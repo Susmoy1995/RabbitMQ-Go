@@ -1,44 +1,36 @@
 package consumer
 
 import (
-	channel "Rabbit-GOPkg/Channels"
 	conn "Rabbit-GOPkg/Connection"
 	"errors"
 )
 
-var body []byte
+func Consume(queueName string) ([]byte, error) {
+	// var cr conn.RabbitMQ
+	var sub *conn.RabbitMQ
+	var err error
 
-func Consumer(queueName string) ([]byte, error) {
-	connection, err := conn.Connection()
+	if sub == nil {
+		sub, err = conn.New()
+		if err != nil {
+			return nil, errors.New(err.Error())
+		}
+	}
+
+	// err = sub.OpenChannel()
+	// if err != nil {
+	// 	return nil, errors.New(err.Error())
+	// }
+
+	// err = sub.CreateQueue(queueName)
+	// if err != nil {
+	// 	return nil, errors.New(err.Error())
+	// }
+
+	result, err := sub.ConsumeMessage(queueName)
 	if err != nil {
 		return nil, errors.New(err.Error())
 	}
-	defer connection.Close()
 
-	ch, err := channel.CreateChannel(connection)
-	if err != nil {
-		return nil, errors.New(err.Error())
-	}
-	defer ch.Close()
-
-	msgs, err := ch.Consume(
-		queueName,
-		"",
-		true,
-		false,
-		false,
-		false,
-		nil,
-	)
-
-	if err != nil {
-		return nil, errors.New(err.Error())
-	}
-
-	for msg := range msgs {
-		body = msg.Body
-		msg.Ack(false)
-	}
-
-	return body, nil
+	return result, nil
 }

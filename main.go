@@ -4,6 +4,7 @@ import (
 	sub "Rabbit-GOPkg/Consumer"
 	pub "Rabbit-GOPkg/Publisher"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -59,7 +60,7 @@ func ConsumerMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	queueName := r.URL.Query().Get("queueName")
-	resp, err := sub.Consumer(queueName)
+	resp, err := sub.Consume(queueName)
 	faceError(w, err)
 
 	// w.WriteHeader(http.StatusAccepted)
@@ -67,9 +68,9 @@ func ConsumerMessage(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-
+	fmt.Printf("Starting server...\n")
 	http.HandleFunc("/publish", PublishMessage)
 	http.HandleFunc("/consume", ConsumerMessage)
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":8085", nil))
 }
